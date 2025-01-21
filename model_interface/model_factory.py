@@ -13,9 +13,9 @@ class ModelFactory:
         cls._models[model_name] = model_class
 
     @classmethod
-    def get_model(cls, model_name):
+    def get_model(cls, model_name, model_init_params=None):
         """Создает и возвращает экземпляр модели по имени."""
         if model_name not in cls._models:
             raise ValueError(f"Model '{model_name}' is not registered.")
-        return cls._models[model_name]()
+        return cls._models[model_name](**model_init_params)
     
