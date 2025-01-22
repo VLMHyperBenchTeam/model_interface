@@ -1,18 +1,55 @@
 from abc import ABC, abstractmethod
+from typing import Any, List
+
 
 class ModelInterface(ABC):
-    """Абстрактный класс для всех моделей."""
-    def __init__(self, model_name, system_prompt, cache_dir):
+    """Абстрактный базовый класс для всех моделей.
+
+    Этот класс определяет интерфейс, который должны реализовывать все модели.
+    Он включает методы для предсказания на основе одного или нескольких изображений.
+
+    Attributes:
+        model_name (str): Название модели как у разработчика (например, "Qwen2-VL-2B").
+        system_prompt (str): Системный промпт, используемый моделью.
+        cache_dir (str): Директория для кэширования данных модели.
+    """
+
+    def __init__(self, model_name: str, system_prompt: str, cache_dir: str) -> None:
+        """Инициализирует экземпляр Фабрики моделей.
+
+        Args:
+            model_name (str): Название модели как у разработчика (например, "Qwen2-VL-2B").
+            system_prompt (str): Системный промпт, используемый моделью.
+            cache_dir (str): Директория для кэширования данных модели.
+        """
         self.model_name = model_name
         self.system_prompt = system_prompt
         self.cache_dir = cache_dir
 
     @abstractmethod
-    def predict_on_image(self, image, question):
-        """Метод для предсказания по одному изображению."""
+    def predict_on_image(self, image: Any, question: str) -> str:
+        """Абстрактный метод для предсказания на основе одного изображения.
+
+        Args:
+            image (Any): Изображение, на основе которого делается предсказание.
+                        Тип может быть специфичным для реализации (например, PIL.Image, np.array и т.д.).
+            question (str): промпт-вопрос по изображению изображению.
+
+        Returns:
+            str: строка с ответом от модели.
+        """
         pass
 
     @abstractmethod
-    def predict_on_images(self, images, question):
-        """Метод для предсказания по нескольким изображениям."""
+    def predict_on_images(self, images: List[Any], question: str) -> str:
+        """Абстрактный метод для предсказания на основе нескольких изображений.
+
+        Args:
+            images (List[Any]): Список изображений, на основе которых делается предсказание.
+                               Тип элементов списка может быть специфичным для реализации.
+            question (str): промпт-вопрос по изображению изображению.
+
+        Returns:
+            str: строка с ответом от модели.
+        """
         pass
