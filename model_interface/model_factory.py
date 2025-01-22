@@ -3,10 +3,16 @@ from typing import Any, Dict, Optional, Type
 
 
 class ModelFactory:
-    """Фабрика для создания и управления зарегистрированными моделями."""
+    """Фабрика для создания моделей.
 
-    # Словарь для хранения зарегистрированных моделей
-    # {model_name: model_class}
+    Класс предоставляет методы для регистрации моделей и создания их экземпляров.
+    Модели регистрируются по имени и пути к классу в Python-пакете.
+
+    Attributes:
+        _models (Dict[str, Type[Any]]): Словарь для хранения зарегистрированных моделей,
+                                        где ключ — имя модели, а значение — класс модели.
+    """
+
     _models: Dict[str, Type[Any]] = {}
 
     @classmethod
@@ -15,8 +21,7 @@ class ModelFactory:
 
         Args:
             model_name (str): Имя модели, под которым она будет зарегистрирована.
-            model_path (str): Путь к классу модели в формате
-                'python_package_name.module_with_class:class_name'.
+            model_path (str): Путь к классу модели в формате 'module_path:class_name'.
 
         Raises:
             ImportError: Если модуль не может быть импортирован.
