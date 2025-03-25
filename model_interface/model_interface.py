@@ -12,6 +12,12 @@ class ModelInterface(ABC):
         model_name (str): Название модели как у разработчика (например, "Qwen2-VL-2B").
         system_prompt (str): Системный промпт, используемый моделью.
         cache_dir (str): Директория для кэширования данных модели.
+        framework (str): Используемый фреймворк для инференса модели 
+                        (например, "Hugging Face", "vLLM", "SGLang").
+                        Каждый унаследованный класс реализует объект модели
+                        привязанный к одному фреймворку инференса.
+                        Этот атрибут класса всегда задан разработчиком класса для модели.
+                        Атрибут не должен изменяться в процессе работы модели.
     """
 
     def __init__(self, model_name: str, system_prompt: str, cache_dir: str) -> None:
@@ -25,6 +31,7 @@ class ModelInterface(ABC):
         self.model_name = model_name
         self.system_prompt = system_prompt
         self.cache_dir = cache_dir
+        self.framework = ""
 
     @abstractmethod
     def predict_on_image(self, image: Any, question: str) -> str:
