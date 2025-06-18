@@ -1,14 +1,7 @@
-[tool.poetry]
+[project]
 name = "model-interface"
-version = "0.1.0"
+version = "0.1.2-dev"
 description = ""
-authors = ["Julia Ovchinnikova <yulia.ovva@gmail.com>"]
 readme = "README.md"
-
-[tool.poetry.dependencies]
-python = "^3.10"
-
-
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires-python = ">=3.10"
+dependencies = []
