@@ -5,6 +5,10 @@ description = "Model interface for VLM HyperBench"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = []
+authors = [
+   "VLMHyperBenchTeam <https://github.com/VLMHyperBenchTeam>",
+   "Anton Shiryaev <med.phisiker@gmail.com>"
+]
 
 [build-system]
 requires = ["hatchling"]
