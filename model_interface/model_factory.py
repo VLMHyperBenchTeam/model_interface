@@ -13,8 +13,8 @@ QWEN_FAMILY_NAME = "Qwen2.5-VL"
 class ModelInterface(Protocol):
     """Протокол для определения интерфейса модели."""
     
-    def predict_on_image(self, image_path: str, question: str) -> str:
-        """Предсказание на основе изображения и вопроса."""
+    def predict_on_image(self, image: Any, prompt: str) -> str:
+        """Предсказание на основе изображения/пути/URL и промпта."""
         ...
 
 
