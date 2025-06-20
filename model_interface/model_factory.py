@@ -277,7 +277,7 @@ class ModelFactory:
         
         # Импортируем модуль, чтобы запустить автоматическую регистрацию
         try:
-            import model_qwen2_5_vl.models
+            import model_qwen2_5_vl.models  # type: ignore
             print("INFO: Модуль model_qwen2_5_vl.models успешно импортирован")
         except ImportError as e:
             print(f"WARNING: Не удалось импортировать model_qwen2_5_vl.models: {str(e)}. Модель может быть не зарегистрирована.")
@@ -331,42 +331,6 @@ class ModelFactory:
             raise ValueError(f"Не удалось инициализировать модель Qwen: {str(e)}") from e
 
 
-def load_prompt(prompt_path: Union[str, Path]) -> str:
-    """Загружает промпт из файла с проверкой существования.
-
-    Args:
-        prompt_path: Путь к файлу с промптом (строка или Path объект).
-
-    Returns:
-        str: Текст промпта.
-
-    Raises:
-        ValueError: При неверном типе пути.
-        FileNotFoundError: Если файл не существует.
-        OSError: При ошибке чтения файла.
-    """
-    # Валидация входного параметра
-    if not prompt_path:
-        raise ValueError("prompt_path не может быть пустым")
-        
-    # Преобразование в Path объект
-    if isinstance(prompt_path, str):
-        prompt_path = Path(prompt_path)
-    elif not isinstance(prompt_path, Path):
-        raise ValueError("prompt_path должен быть строкой или Path объектом")
-    
-    # Проверка существования файла
-    if not prompt_path.exists():
-        raise FileNotFoundError(f"Файл промпта не найден: {prompt_path}")
-    
-    if not prompt_path.is_file():
-        raise FileNotFoundError(f"Путь не является файлом: {prompt_path}")
-    
-    # Загрузка файла
-    try:
-        content = prompt_path.read_text(encoding="utf-8")
-        print(f"INFO: Промпт успешно загружен из файла: {prompt_path}")
-        return content
-    except OSError as e:
-        print(f"ERROR: Ошибка чтения файла промпта {prompt_path}: {str(e)}")
-        raise OSError(f"Не удалось прочитать файл промпта {prompt_path}: {str(e)}") from e
+# --------------------------------------------------------------------------------------
+# Бывший алиас ``load_prompt`` удалён, чтобы устаревшие импорты упали и были исправлены.
+# --------------------------------------------------------------------------------------
