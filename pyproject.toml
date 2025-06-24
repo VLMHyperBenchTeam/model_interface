@@ -1,6 +1,6 @@
 [project]
 name = "model-interface"
-version = "0.1.2.dev3"
+version = "0.1.2.dev4"
 description = "Model interface for VLM HyperBench"
 readme = "README.md"
 requires-python = ">=3.10"
