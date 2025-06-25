@@ -1,7 +1,7 @@
 import importlib
 import threading
 from pathlib import Path
-from typing import Any, Dict, Optional, Type, Protocol, Union
+from typing import Any, Dict, Optional, Protocol, Type
 
 # Константы
 DEFAULT_CACHE_DIR = "model_cache"
@@ -277,7 +277,7 @@ class ModelFactory:
         
         # Импортируем модуль, чтобы запустить автоматическую регистрацию
         try:
-            import model_qwen2_5_vl.models  # type: ignore
+            import model_qwen2_5_vl.models  # type: ignore  # noqa: F401
             print("INFO: Модуль model_qwen2_5_vl.models успешно импортирован")
         except ImportError as e:
             print(f"WARNING: Не удалось импортировать model_qwen2_5_vl.models: {str(e)}. Модель может быть не зарегистрирована.")
