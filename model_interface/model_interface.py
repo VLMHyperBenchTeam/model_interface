@@ -34,13 +34,13 @@ class ModelInterface(ABC):
         self.framework = ""
 
     @abstractmethod
-    def predict_on_image(self, image: Any, question: str) -> str:
+    def predict_on_image(self, image: Any, prompt: str) -> str:
         """Абстрактный метод для предсказания на основе одного изображения.
 
         Args:
             image (Any): Изображение, на основе которого делается предсказание.
                         Тип может быть специфичным для реализации (например, PIL.Image, np.array и т.д.).
-            question (str): промпт-вопрос по изображению изображению.
+            prompt (str): промпт-вопрос по изображению.
 
         Returns:
             str: строка с ответом от модели.
@@ -48,13 +48,13 @@ class ModelInterface(ABC):
         pass
 
     @abstractmethod
-    def predict_on_images(self, images: List[Any], question: str) -> str:
+    def predict_on_images(self, images: List[Any], prompt: str) -> str:
         """Абстрактный метод для предсказания на основе нескольких изображений.
 
         Args:
             images (List[Any]): Список изображений, на основе которых делается предсказание.
                                Тип элементов списка может быть специфичным для реализации.
-            question (str): промпт-вопрос по изображению изображению.
+            prompt (str): промпт-вопрос по изображению.
 
         Returns:
             str: строка с ответом от модели.

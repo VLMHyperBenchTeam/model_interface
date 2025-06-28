@@ -1,5 +1,5 @@
 import time
-from typing import Callable, Any
+from typing import Any, Callable
 
 
 def measure_inference_time(model_callable: Callable[..., Any], *args, **kwargs) -> float:

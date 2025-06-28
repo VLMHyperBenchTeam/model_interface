@@ -1,7 +1,7 @@
 # 🤖 Model Interface — Универсальный интерфейс для VLM-моделей
 
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10+-blue.svg)](https://www.python.org/downloads/)
-[![Poetry](https://img.shields.io/badge/dependencies-poetry-green)](https://python-poetry.org/)
+[![uv 0.7.13](https://img.shields.io/badge/dependencies-uv%200.7.13-blue)](https://github.com/astral-sh/uv)
 
 **Model Interface** — это гибкий python-пакет для унификации работы с VLM-моделями для `VLMHyperBench`([ссылка](https://github.com/VLMHyperBenchTeam/VLMHyperBench)).
 
@@ -37,11 +37,11 @@ TODO: скоро здесь появится ссылка.
 ## 📦 Установка
 
 ```bash
-# Через Poetry
-poetry add model-interface
+# С помощью uv (рекомендуется)
+uv pip install model_interface
 
 # Или через pip
-pip install model-interface
+pip install model_interface
 ```
 
 ## 🛠 Использование
@@ -85,7 +85,7 @@ model_interface/
 ├── model_interface.py — Базовый абстрактный класс для всех моделей
 └── model_utils.py    — Утилиты для измерения производительности
 tests/                — Unit-тесты (пока пустые)
-pyproject.toml        — Конфигурация проекта для Poetry
+pyproject.toml        — Основная конфигурация проекта (обрабатывается uv/pip)
 ```
 
 ## 📦 Примеры реализации Python-пакетов для VLM

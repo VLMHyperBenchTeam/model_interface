@@ -1,14 +1,21 @@
-[tool.poetry]
+[project]
 name = "model-interface"
-version = "0.1.0"
-description = ""
-authors = ["Julia Ovchinnikova <yulia.ovva@gmail.com>"]
+version = "0.1.2"
+description = "Model interface for VLM HyperBench"
 readme = "README.md"
-
-[tool.poetry.dependencies]
-python = "^3.10"
-
+requires-python = ">=3.10"
+dependencies = []
+authors = [
+   {name = "Anton Shiryaev", email = "med.phisiker@gmail.com"}
+]
 
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["model_interface"]
+
+[project.urls]
+Repository = "https://github.com/VLMHyperBenchTeam/model_interface"
+Homepage = "https://github.com/VLMHyperBenchTeam"
