@@ -2,7 +2,7 @@ import time
 from typing import Any, Callable
 
 
-def measure_inference_time(model_callable: Callable[..., Any], *args, **kwargs) -> float:
+def measure_inference_time(model_callable: Callable[..., Any], *args: Any, **kwargs: Any) -> float:
     """
     Измеряет время выполнения (inference time) программы или функции.
 

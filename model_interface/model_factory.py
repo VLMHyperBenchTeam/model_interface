@@ -3,11 +3,9 @@ import threading
 from pathlib import Path
 from typing import Any, Dict, Optional, Protocol, Type
 
-# Константы
+# Константы (универсальные)
 DEFAULT_CACHE_DIR = "model_cache"
 DEFAULT_DEVICE_MAP = "auto"
-DEFAULT_QWEN_MODEL = "Qwen2.5-VL-7B-Instruct"
-QWEN_FAMILY_NAME = "Qwen2.5-VL"
 
 
 class ModelInterface(Protocol):
@@ -152,180 +150,93 @@ class ModelFactory:
 
     @classmethod
     def initialize_model(cls, model_config: Dict[str, Any]) -> ModelInterface:
-        """Инициализирует и возвращает модель согласно конфигурации.
-        
-        Функция автоматически регистрирует модель в ModelFactory и создает экземпляр.
-        Поддерживает как полную конфигурацию (с указанием package, module, model_class),
-        так и упрощенную (только model_family для предварительно зарегистрированных моделей).
+        """Инициализирует и возвращает модель согласно вложенной конфигурации.
 
-        Args:
-            model_config: Словарь конфигурации модели. Обязательные ключи:
-                - model_family: семейство модели (например, "Qwen2.5-VL")
-                - model_name: имя модели (например, "Qwen2.5-VL-7B-Instruct")
-                - cache_dir: директория для кэша модели
-                - device_map: карта устройств для модели
-                
-                Опциональные ключи для регистрации новых моделей:
-                - package: пакет с классом модели
-                - module: модуль с классом модели  
-                - model_class: имя класса модели
+        Ожидаем словарь следующего вида::
 
-        Returns:
-            ModelInterface: Инициализированный объект модели.
+            {
+                "common_params": {
+                    "model_family": "Qwen2.5-VL",
+                    "model_name": "Qwen2.5-VL-7B-Instruct",
+                    "cache_dir": "/tmp",
+                    "device_map": "auto",
+                    "system_prompt": "...",           # опционально
+                    "package": "...", "module": "...", "model_class": "..."  # при необходимости регистрации
+                },
+                "specific_params": {
+                    "max_size": 2048 * 28 * 28,
+                    ...                 # любые поля, понятные семейству модели
+                }
+            }
 
-        Raises:
-            KeyError: При отсутствии обязательных ключей в конфигурации.
-            OSError: При ошибках создания директории кэша.
-            ValueError: При ошибке регистрации или создания модели.
+        Мы намеренно нарушаем обратную совместимость: прежний «плоский» формат
+        больше не поддерживается.
         """
-        # Валидация конфигурации
+
         if not isinstance(model_config, dict):
-            raise ValueError("model_config должен быть словарем")
-            
-        # Проверка обязательных ключей
-        required_keys = {
-            "model_family", 
-            "cache_dir", 
-            "model_name",
-            "device_map"
-        }
-        if missing := required_keys - set(model_config):
-            raise KeyError(f"Отсутствуют обязательные ключи: {missing}")
+            raise ValueError("model_config должен быть словарём")
 
-        # Валидация значений
+        if "common_params" not in model_config or not isinstance(model_config["common_params"], dict):
+            raise KeyError("Отсутствует обязательный ключ 'common_params' или он не словарь")
+
+        common_params: Dict[str, Any] = model_config["common_params"]
+        specific_params: Dict[str, Any] = model_config.get("specific_params", {})
+
+        # ----------------------------------------------
+        # Валидация common_params
+        # ----------------------------------------------
+        required_keys = {"model_family", "model_name", "cache_dir", "device_map"}
+        if missing := required_keys - common_params.keys():
+            raise KeyError(f"В 'common_params' отсутствуют обязательные ключи: {missing}")
+
         for key in required_keys:
-            if not model_config[key]:
-                raise ValueError(f"Ключ '{key}' не может быть пустым")
+            if not common_params[key]:
+                raise ValueError(f"Значение '{key}' в 'common_params' не может быть пустым")
 
-        # Создание директории для кэша
-        cache_dir = Path(model_config["cache_dir"])
+        # ----------------------------------------------
+        # Подготовка директории кэша
+        # ----------------------------------------------
+        cache_dir = Path(common_params["cache_dir"])
         try:
             cache_dir.mkdir(parents=True, exist_ok=True)
             print(f"INFO: Директория кэша создана/проверена: {cache_dir}")
         except OSError as e:
-            print(f"ERROR: Ошибка создания директории кэша {cache_dir}: {str(e)}")
             raise OSError(f"Не удалось создать директорию кэша {cache_dir}: {str(e)}") from e
 
-        model_family = model_config["model_family"]
-        
-        # Регистрируем модель в фабрике, если указаны детали реализации
-        if all(key in model_config for key in ["package", "module", "model_class"]):
-            package = model_config["package"]
-            module = model_config["module"]
-            model_class = model_config["model_class"]
-            
-            # Валидация параметров регистрации
+        model_family = common_params["model_family"]
+
+        # ----------------------------------------------
+        # Регистрация модели (если указаны package/module/class)
+        # ----------------------------------------------
+        if all(k in common_params for k in ("package", "module", "model_class")):
+            package = common_params["package"]
+            module = common_params["module"]
+            model_class = common_params["model_class"]
+
             if not all([package, module, model_class]):
-                raise ValueError("Параметры регистрации (package, module, model_class) не могут быть пустыми")
-                
+                raise ValueError("package, module и model_class не могут быть пустыми")
+
             model_class_path = f"{package}.{module}:{model_class}"
-            
-            print(f"INFO: Регистрация модели {model_family}: {model_class_path}")
+            print(f"INFO: Регистрация модели '{model_family}': {model_class_path}")
             cls.register_model(model_family, model_class_path)
 
-        # Подготовка параметров модели
-        model_params = {
-            "model_name": model_config["model_name"],
-            "system_prompt": model_config.get("system_prompt", ""),
+        # ----------------------------------------------
+        # Формирование итоговых параметров конструктора
+        # ----------------------------------------------
+        model_params: Dict[str, Any] = {
+            "model_name": common_params["model_name"],
+            "system_prompt": common_params.get("system_prompt", ""),
             "cache_dir": str(cache_dir),
-            "device_map": model_config["device_map"],
+            "device_map": common_params["device_map"],
         }
 
-        print(f"INFO: Инициализация модели: {model_config['model_name']}")
-        
-        # Создание экземпляра модели
+        if specific_params:
+            print(f"INFO: Специфические параметры для '{model_family}': {specific_params}")
+            model_params.update(specific_params)
+
+        print(f"INFO: Инициализируем модель: {common_params['model_name']}")
+
         try:
             return cls.get_model(model_family, model_params)
         except Exception as e:
-            print(f"ERROR: Ошибка создания модели {model_family}: {str(e)}")
-            raise ValueError(f"Ошибка инициализации модели {model_family}") from e
-
-    @classmethod
-    def create_qwen_model_config(
-        cls,
-        model_name: str = DEFAULT_QWEN_MODEL,
-        cache_dir: str = DEFAULT_CACHE_DIR, 
-        device_map: str = DEFAULT_DEVICE_MAP,
-        system_prompt: str = ""
-    ) -> Dict[str, Any]:
-        """Создает конфигурацию для модели Qwen2.5-VL с предустановленными параметрами.
-        
-        Модель Qwen2.5-VL автоматически регистрируется при импорте модуля model_qwen2_5_vl.models,
-        поэтому здесь указываются только параметры инициализации.
-        
-        Args:
-            model_name: Имя модели Qwen (по умолчанию "Qwen2.5-VL-7B-Instruct")
-            cache_dir: Директория для кэша (по умолчанию "model_cache")
-            device_map: Карта устройств (по умолчанию "auto")
-            system_prompt: Системный промпт (по умолчанию пустой)
-            
-        Returns:
-            Dict[str, Any]: Словарь конфигурации модели, готовый для передачи в initialize_model
-            
-        Raises:
-            ValueError: При неверных входных параметрах.
-        """
-        # Валидация входных параметров
-        if not model_name or not isinstance(model_name, str):
-            raise ValueError("model_name должен быть непустой строкой")
-        if not cache_dir or not isinstance(cache_dir, str):
-            raise ValueError("cache_dir должен быть непустой строкой")
-        if not device_map or not isinstance(device_map, str):
-            raise ValueError("device_map должен быть непустой строкой")
-        if not isinstance(system_prompt, str):
-            raise ValueError("system_prompt должен быть строкой")
-        
-        # Импортируем модуль, чтобы запустить автоматическую регистрацию
-        try:
-            import model_qwen2_5_vl.models  # type: ignore  # noqa: F401
-            print("INFO: Модуль model_qwen2_5_vl.models успешно импортирован")
-        except ImportError as e:
-            print(f"WARNING: Не удалось импортировать model_qwen2_5_vl.models: {str(e)}. Модель может быть не зарегистрирована.")
-        
-        return {
-            "model_family": QWEN_FAMILY_NAME,
-            "model_name": model_name,
-            "cache_dir": cache_dir,
-            "device_map": device_map,
-            "system_prompt": system_prompt,
-        }
-
-    @classmethod
-    def initialize_qwen_model(
-        cls,
-        model_name: str = DEFAULT_QWEN_MODEL,
-        cache_dir: str = DEFAULT_CACHE_DIR,
-        device_map: str = DEFAULT_DEVICE_MAP,
-        system_prompt: str = ""
-    ) -> ModelInterface:
-        """Упрощенная функция для инициализации модели Qwen2.5-VL.
-        
-        Объединяет создание конфигурации и инициализацию модели в один вызов.
-        
-        Args:
-            model_name: Имя модели Qwen (по умолчанию "Qwen2.5-VL-7B-Instruct")
-            cache_dir: Директория для кэша (по умолчанию "model_cache")
-            device_map: Карта устройств (по умолчанию "auto")
-            system_prompt: Системный промпт (по умолчанию пустой)
-            
-        Returns:
-            ModelInterface: Инициализированный объект модели Qwen2.5-VL
-            
-        Raises:
-            ValueError: При неверных входных параметрах или ошибке инициализации.
-            
-        Example:
-            >>> model = ModelFactory.initialize_qwen_model("Qwen2.5-VL-7B-Instruct", device_map="cuda:0")
-            >>> result = model.predict_on_image("image.jpg", "Что на картинке?")
-        """
-        try:
-            config = cls.create_qwen_model_config(
-                model_name=model_name,
-                cache_dir=cache_dir,
-                device_map=device_map,
-                system_prompt=system_prompt
-            )
-            return cls.initialize_model(config)
-        except Exception as e:
-            print(f"ERROR: Ошибка инициализации модели Qwen: {str(e)}")
-            raise ValueError(f"Не удалось инициализировать модель Qwen: {str(e)}") from e
+            raise ValueError(f"Ошибка инициализации модели {model_family}: {str(e)}") from e

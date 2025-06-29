@@ -58,6 +58,36 @@ ModelFactory.register_model(
 )
 ```
 
+### Quick Start — вложенная конфигурация
+
+Для моделей, уже зарегистрированных при импорте собственного python-пакета, достаточно
+передать **вложенный** словарь конфигурации в `ModelFactory.initialize_model`:
+
+```python
+from model_interface.model_factory import ModelFactory
+
+config = {
+    "common_params": {
+        "model_family": "Qwen2.5-VL",
+        "model_name": "Qwen2.5-VL-7B-Instruct",
+        "cache_dir": "model_cache",
+        "device_map": "auto",
+        "system_prompt": "Ты — эксперт по документам",
+    },
+    # Параметры, специфичные для семейства/конкретной модели
+    "specific_params": {
+        "max_size": 2048 * 28 * 28,
+        "min_size": 512 * 28 * 28,
+    },
+}
+
+model = ModelFactory.initialize_model(config)
+result = model.predict_on_image("invoice.jpg", "Опиши документ")
+```
+
+Если пакет модели предоставляет функцию-обёртку, то можно использовать её напрямую
+(см. пример для Qwen ниже).
+
 ### 2. Создание экземпляра
 ```python
 model = ModelFactory.get_model(
