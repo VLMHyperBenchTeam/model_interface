@@ -223,16 +223,10 @@ class ModelFactory:
         # ----------------------------------------------
         # Формирование итоговых параметров конструктора
         # ----------------------------------------------
+        # Передаем весь model_config в конструктор модели
         model_params: Dict[str, Any] = {
-            "model_name": common_params["model_name"],
-            "system_prompt": common_params.get("system_prompt", ""),
-            "cache_dir": str(cache_dir),
-            "device_map": common_params["device_map"],
+            "model_config": model_config
         }
-
-        if specific_params:
-            print(f"INFO: Специфические параметры для '{model_family}': {specific_params}")
-            model_params.update(specific_params)
 
         print(f"INFO: Инициализируем модель: {common_params['model_name']}")
 
