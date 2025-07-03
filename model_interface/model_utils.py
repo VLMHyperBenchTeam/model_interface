@@ -1,5 +1,6 @@
+from collections.abc import Callable
 import time
-from typing import Any, Callable
+from typing import Any
 
 
 def measure_inference_time(model_callable: Callable[..., Any], *args: Any, **kwargs: Any) -> float:
