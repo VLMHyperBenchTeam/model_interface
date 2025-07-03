@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Any, List
+from typing import Any
 
 
 class ModelInterface(ABC):
@@ -12,7 +12,7 @@ class ModelInterface(ABC):
         model_name (str): Название модели как у разработчика (например, "Qwen2-VL-2B").
         system_prompt (str): Системный промпт, используемый моделью.
         cache_dir (str): Директория для кэширования данных модели.
-        framework (str): Используемый фреймворк для инференса модели 
+        framework (str): Используемый фреймворк для инференса модели
                         (например, "Hugging Face", "vLLM", "SGLang").
                         Каждый унаследованный класс реализует объект модели
                         привязанный к одному фреймворку инференса.
@@ -48,7 +48,7 @@ class ModelInterface(ABC):
         pass
 
     @abstractmethod
-    def predict_on_images(self, images: List[Any], prompt: str) -> str:
+    def predict_on_images(self, images: list[Any], prompt: str) -> str:
         """Абстрактный метод для предсказания на основе нескольких изображений.
 
         Args:

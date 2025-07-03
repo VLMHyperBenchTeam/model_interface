@@ -1,7 +1,7 @@
 import importlib
-import threading
 from pathlib import Path
-from typing import Any, Dict, Optional, Protocol, Type
+import threading
+from typing import Any, Protocol
 
 # Константы (универсальные)
 DEFAULT_CACHE_DIR = "model_cache"
@@ -10,7 +10,7 @@ DEFAULT_DEVICE_MAP = "auto"
 
 class ModelInterface(Protocol):
     """Протокол для определения интерфейса модели."""
-    
+
     def predict_on_image(self, image: Any, prompt: str) -> str:
         """Предсказание на основе изображения/пути/URL и промпта."""
         ...
@@ -29,7 +29,7 @@ class ModelFactory:
         _lock (threading.Lock): Блокировка для потокобезопасности.
     """
 
-    _models: Dict[str, Type[ModelInterface]] = {}
+    _models: dict[str, type[ModelInterface]] = {}
     _lock = threading.Lock()
 
     @classmethod
@@ -48,10 +48,10 @@ class ModelFactory:
         # Валидация входных данных
         if not model_name or not isinstance(model_name, str):
             raise ValueError("model_name должен быть непустой строкой")
-        
+
         if not model_path or not isinstance(model_path, str):
             raise ValueError("model_path должен быть непустой строкой")
-            
+
         if ":" not in model_path:
             raise ValueError(
                 "model_path должен быть в формате 'module_path:class_name'"
@@ -59,23 +59,23 @@ class ModelFactory:
 
         try:
             module_path, class_name = model_path.split(":", 1)  # Разделяем только первый ':'
-            
+
             if not module_path or not class_name:
                 raise ValueError("Неверный формат пути модели")
-                
+
             print(f"INFO: Попытка импорта модуля: {module_path}")
             module = importlib.import_module(module_path)
-            
+
             if not hasattr(module, class_name):
                 raise AttributeError(f"Класс '{class_name}' не найден в модуле '{module_path}'")
-                
+
             model_class = getattr(module, class_name)
-            
+
             # Потокобезопасная регистрация
             with cls._lock:
                 cls._models[model_name] = model_class
                 print(f"INFO: Модель '{model_name}' успешно зарегистрирована")
-                
+
         except ImportError as e:
             print(f"ERROR: Ошибка импорта модуля '{module_path}': {str(e)}")
             raise ImportError(f"Не удалось импортировать модуль '{module_path}': {str(e)}") from e
@@ -85,7 +85,7 @@ class ModelFactory:
 
     @classmethod
     def get_model(
-        cls, model_name: str, model_init_params: Optional[Dict[str, Any]] = None
+        cls, model_name: str, model_init_params: dict[str, Any] | None = None
     ) -> ModelInterface:
         """Создает и возвращает экземпляр модели по её имени.
 
@@ -102,7 +102,7 @@ class ModelFactory:
         """
         if not model_name or not isinstance(model_name, str):
             raise ValueError("model_name должен быть непустой строкой")
-            
+
         if model_init_params is None:
             model_init_params = {}
         elif not isinstance(model_init_params, dict):
@@ -115,7 +115,7 @@ class ModelFactory:
                     f"Модель '{model_name}' не зарегистрирована. "
                     f"Доступные модели: {available_models}"
                 )
-            
+
             model_class = cls._models[model_name]
 
         try:
@@ -126,9 +126,9 @@ class ModelFactory:
             raise ValueError(f"Ошибка создания экземпляра модели '{model_name}': {str(e)}") from e
 
     @classmethod
-    def get_registered_models(cls) -> Dict[str, Type[ModelInterface]]:
+    def get_registered_models(cls) -> dict[str, type[ModelInterface]]:
         """Возвращает копию словаря зарегистрированных моделей.
-        
+
         Returns:
             Dict[str, Type[ModelInterface]]: Копия словаря моделей.
         """
@@ -138,10 +138,10 @@ class ModelFactory:
     @classmethod
     def is_model_registered(cls, model_name: str) -> bool:
         """Проверяет, зарегистрирована ли модель.
-        
+
         Args:
             model_name (str): Имя модели для проверки.
-            
+
         Returns:
             bool: True, если модель зарегистрирована, иначе False.
         """
@@ -149,7 +149,7 @@ class ModelFactory:
             return model_name in cls._models
 
     @classmethod
-    def initialize_model(cls, model_config: Dict[str, Any]) -> ModelInterface:
+    def initialize_model(cls, model_config: dict[str, Any]) -> ModelInterface:
         """Инициализирует и возвращает модель согласно вложенной конфигурации.
 
         Ожидаем словарь следующего вида::
@@ -179,8 +179,8 @@ class ModelFactory:
         if "common_params" not in model_config or not isinstance(model_config["common_params"], dict):
             raise KeyError("Отсутствует обязательный ключ 'common_params' или он не словарь")
 
-        common_params: Dict[str, Any] = model_config["common_params"]
-        specific_params: Dict[str, Any] = model_config.get("specific_params", {})
+        common_params: dict[str, Any] = model_config["common_params"]
+        model_config.get("specific_params", {})
 
         # ----------------------------------------------
         # Валидация common_params
@@ -224,7 +224,7 @@ class ModelFactory:
         # Формирование итоговых параметров конструктора
         # ----------------------------------------------
         # Передаем весь model_config в конструктор модели
-        model_params: Dict[str, Any] = {
+        model_params: dict[str, Any] = {
             "model_config": model_config
         }
 
