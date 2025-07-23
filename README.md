@@ -1,7 +1,7 @@
 # 🤖 Model Interface — Универсальный интерфейс для VLM-моделей
 
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10+-blue.svg)](https://www.python.org/downloads/)
-[![uv 0.7.13](https://img.shields.io/badge/dependencies-uv%200.7.13-blue)](https://github.com/astral-sh/uv)
+[![uv 0.8.2](https://img.shields.io/badge/dependencies-uv%200.8.2-blue)](https://github.com/astral-sh/uv)
 
 **Model Interface** — это гибкий python-пакет для унификации работы с VLM-моделями для `VLMHyperBench`([ссылка](https://github.com/VLMHyperBenchTeam/VLMHyperBench)).
 
@@ -28,7 +28,7 @@
 - **ModelFactory**: Фабричный класс для регистрации и создания экземпляров моделей из python-пакетов.
 - **ModelInterface**: Интерфейсный класс, который определяет стандартные методы для работы с VLM.
 
-![Architecture](repo_pics/Architecture.jpg)
+![Architecture](docs/diagrams/model_interface.svg)
 
 ## 📚 Документация
 
@@ -36,13 +36,25 @@ TODO: скоро здесь появится ссылка.
 
 ## 📦 Установка
 
+### Установка из PyPI (рекомендуемый способ)
 ```bash
-# С помощью uv (рекомендуется)
 uv pip install model_interface
-
-# Или через pip
+# или
 pip install model_interface
 ```
+
+### Установка из репозитория (Git)
+*   **Для пользователей с `uv` и `pyproject.toml` (рекомендуемый способ)**:
+    ```bash
+    uv add git+https://github.com/VLMHyperBenchTeam/model_interface.git@main
+    uv sync
+    ```
+*   **Для пользователей с `pip` или `uv` (прямая установка)**:
+    ```bash
+    pip install git+https://github.com/VLMHyperBenchTeam/model_interface.git@main
+    # или
+    uv pip install git+https://github.com/VLMHyperBenchTeam/model_interface.git@main
+    ```
 
 ## 🛠 Использование
 
@@ -80,12 +92,14 @@ results = model.predict_on_images([img1, img2], "Сравни эти докум�
 
 ## 📂 Структура проекта
 ```
-model_interface/
-├── model_factory.py  — Фабрика для регистрации моделей
-├── model_interface.py — Базовый абстрактный класс для всех моделей
-└── model_utils.py    — Утилиты для измерения производительности
-tests/                — Unit-тесты (пока пустые)
-pyproject.toml        — Основная конфигурация проекта (обрабатывается uv/pip)
+src/
+└── model_interface
+    ├── __init__.py
+    ├── model_factory.py  — Фабрика для регистрации и создания моделей
+    ├── model_interface.py — Базовый абстрактный класс для всех моделей
+    └── model_utils.py    — Утилиты для измерения производительности
+tests/                — Unit-тесты
+pyproject.toml        — Основная конфигурация проекта (сборка с помощью uv_build)
 ```
 
 ## 📦 Примеры реализации Python-пакетов для VLM

@@ -1,0 +1,44 @@
+@startuml
+skinparam classAttributeIconSize 0
+
+class ModelInterface {
+    + framework: str = ""
+    + __init__(self, model_name: str, system_prompt: str, cache_dir: str) -> None
+    + predict_on_image(self, image: Any, prompt: str) -> str
+    + predict_on_images(self, images: List[Any], prompt: str) -> str
+}
+
+class ModelFactory {
+    + _models: Dict[str, Type[ModelInterface]] = {}
+    + _lock: threading.Lock
+    + register_model(cls, model_name: str, model_path: str) -> None
+    + get_model(cls, model_name: str, model_init_params: Optional[Dict[str, Any]] = None) -> ModelInterface
+    + get_registered_models(cls) -> Dict[str, Type[ModelInterface]]
+    + is_model_registered(cls, model_name: str) -> bool
+    + initialize_model(cls, model_config: Dict[str, Any]) -> ModelInterface
+    + create_qwen_model_config(cls, model_name: str = "Qwen2.5-VL-7B-Instruct", cache_dir: str = "model_cache", device_map: str = "auto", system_prompt: str = "") -> Dict[str, Any]
+    + initialize_qwen_model(cls, model_name: str = "Qwen2.5-VL-7B-Instruct", cache_dir: str = "model_cache", device_map: str = "auto", system_prompt: str = "") -> ModelInterface
+}
+
+class Qwen2_5_VLModel {
+    + framework: str = "Hugging Face"
+    + __init__(model_name, system_prompt, cache_dir, device_map)
+    + predict_on_image(image, prompt)
+    + predict_on_images(images, prompt)
+}
+
+class "объект Qwen2_5_VLModel" {
+    + model_name: str = "Qwen2.5-VL-3B-Instruct"
+    + system_prompt: str = ""
+    + cache_dir: str = "cache"
+    + device_map: str = "auto"
+    + framework: str = "Hugging Face"
+    + predict_on_image(image, prompt)
+    + predict_on_images(images, prompt)
+}
+
+Qwen2_5_VLModel --|> ModelInterface : наследуется
+ModelFactory ..> Qwen2_5_VLModel : регистрирует класс\nна производство объекта
+ModelFactory ..> "объект Qwen2_5_VLModel" : Чтобы произвести\nобращается\nк производителю
+Qwen2_5_VLModel ..> "объект Qwen2_5_VLModel" : Производит
+@enduml
