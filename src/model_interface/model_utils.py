@@ -4,7 +4,9 @@ from collections.abc import Callable
 from typing import Any
 
 
-def measure_inference_time(model_callable: Callable[..., Any], *args: Any, **kwargs: Any) -> float:
+def measure_inference_time(
+    model_callable: Callable[..., Any], *args: Any, **kwargs: Any
+) -> float:
     """
     Измеряет время выполнения (inference time) программы или функции.
 
@@ -30,11 +32,47 @@ def measure_inference_time(model_callable: Callable[..., Any], *args: Any, **kwa
 
 
 def load_model_config(config_path: str) -> dict:
-    """Загружает конфигурацию модели из JSON файла."""
+    """Загружает конфигурацию модели из JSON файла.
+
+    Структура конфигурации модели описана в README.md пакета model_interface.
+    Пример конфигурации:
+    {
+        "common_params": {
+            "model_family": "Qwen2.5-VL",
+            "model_name": "Qwen2.5-VL-7B-Instruct",
+            "cache_dir": "model_cache",
+            "device_map": "auto",
+            "system_prompt": "Ты — эксперт по документам",
+        },
+        "specific_params": {
+            "max_size": 2048 * 28 * 28,
+            "min_size": 512 * 28 * 28,
+        }
+    }
+
+    Args:
+        config_path (str): Путь к JSON файлу с конфигурацией модели.
+
+    Returns:
+        dict: Словарь с конфигурацией модели, загруженный из JSON файла.
+
+    Raises:
+        FileNotFoundError: Если файл по указанному пути не найден.
+        ValueError: Если произошла ошибка при парсинге JSON файла.
+
+    Пример:
+        >>> config = load_model_config("config.json")
+        >>> print(config["model_name"])
+        "qwen2.5-vl"
+    """
     try:
         with open(config_path, "r", encoding="utf-8") as f:
             return json.load(f)
     except FileNotFoundError:
-        raise FileNotFoundError(f"Файл конфигурации не найден: {config_path}") from None
+        raise FileNotFoundError(
+            f"Файл конфигурации не найден: {config_path}"
+        ) from None
     except json.JSONDecodeError as e:
-        raise ValueError(f"Ошибка парсинга JSON в файле {config_path}: {e}") from e
+        raise ValueError(
+            f"Ошибка парсинга JSON в файле {config_path}: {e}"
+        ) from e
